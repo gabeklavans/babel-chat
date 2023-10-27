@@ -1,24 +1,28 @@
 const std = @import("std");
 
 pub fn main() !void {
-    // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
-    std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
-
-    // stdout is for the actual output of your application, for example if you
-    // are implementing gzip, then only the compressed bytes should be sent to
-    // stdout, not any debugging messages.
-    const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);
-    const stdout = bw.writer();
-
-    try stdout.print("Run `zig build test` to run the tests.\n", .{});
-
-    try bw.flush(); // don't forget to flush!
+    // std.stdout.print("Run `zig build test` to run the tests.\n", .{});
 }
 
 test "simple test" {
-    var list = std.ArrayList(i32).init(std.testing.allocator);
-    defer list.deinit(); // try commenting this out and see if zig detects the memory leak!
-    try list.append(42);
-    try std.testing.expectEqual(@as(i32, 42), list.pop());
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+
+    const allocator = arena.allocator();
+
+    const address = try std.net.Address.parseIp("127.0.0.1", 9000);
+    var stream = std.net.tcpConnectToAddress(address) catch |err| {
+        std.debug.print("\n-- Make sure server is running! --\n", .{});
+        return err;
+    };
+    defer stream.close();
+
+    const write_message = "You smell sorry!";
+    const write_len = try stream.write(write_message);
+    try std.testing.expectEqual(write_message.len, write_len);
+
+    var read_message = try allocator.alloc(u8, write_message.len);
+    const read_len = try stream.read(read_message);
+
+    try std.testing.expectEqualSlices(u8, write_message, read_message[0..read_len]);
 }
