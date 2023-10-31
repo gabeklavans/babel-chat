@@ -4,7 +4,7 @@ pub fn main() !void {
     // std.stdout.print("Run `zig build test` to run the tests.\n", .{});
 }
 
-test "simple test" {
+test "echo server test" {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
 
