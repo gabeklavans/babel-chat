@@ -10,7 +10,10 @@ test "simple test" {
 
     const allocator = arena.allocator();
 
-    const address = try std.net.Address.parseIp("127.0.0.1", 9000);
+    comptime var host_name = "127.0.0.1";
+    comptime var port = 9000;
+
+    const address = try std.net.Address.parseIp(host_name, port);
     var stream = std.net.tcpConnectToAddress(address) catch {
         std.debug.print("\n-- Make sure server is running! --\n", .{});
         std.os.exit(1);
