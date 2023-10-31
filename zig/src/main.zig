@@ -11,9 +11,9 @@ test "simple test" {
     const allocator = arena.allocator();
 
     const address = try std.net.Address.parseIp("127.0.0.1", 9000);
-    var stream = std.net.tcpConnectToAddress(address) catch |err| {
+    var stream = std.net.tcpConnectToAddress(address) catch {
         std.debug.print("\n-- Make sure server is running! --\n", .{});
-        return err;
+        std.os.exit(1);
     };
     defer stream.close();
 
