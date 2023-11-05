@@ -1,7 +1,15 @@
 const std = @import("std");
+const babbel = @import("babbel.zig");
+
+
 
 pub fn main() !void {
+    const host_name = "127.0.0.1";
+    const port = 9000;
     // std.stdout.print("Run `zig build test` to run the tests.\n", .{});
+    var app = try babbel.BabbelApp.init(host_name, port);
+    defer app.close();
+    try app.run();
 }
 
 test "echo server test" {
