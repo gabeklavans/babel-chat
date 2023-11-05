@@ -1,19 +1,30 @@
 const std = @import("std");
+const babbel = @import("babbel.zig");
+
+
 
 pub fn main() !void {
+    const host_name = "127.0.0.1";
+    const port = 9000;
     // std.stdout.print("Run `zig build test` to run the tests.\n", .{});
+    var app = try babbel.BabbelApp.init(host_name, port);
+    defer app.close();
+    try app.run();
 }
 
-test "simple test" {
+test "echo server test" {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
 
     const allocator = arena.allocator();
 
-    const address = try std.net.Address.parseIp("127.0.0.1", 9000);
-    var stream = std.net.tcpConnectToAddress(address) catch |err| {
+    comptime var host_name = "127.0.0.1";
+    comptime var port = 9000;
+
+    const address = try std.net.Address.parseIp(host_name, port);
+    var stream = std.net.tcpConnectToAddress(address) catch {
         std.debug.print("\n-- Make sure server is running! --\n", .{});
-        return err;
+        std.os.exit(1);
     };
     defer stream.close();
 
